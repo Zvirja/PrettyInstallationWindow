@@ -80,7 +80,7 @@ namespace SIM.Tool.UserControls.Install
       Assert.IsNotNull(location, "The location folder isn't set");
 
       string rootPath = Path.Combine(location, rootName);
-      bool locationIsPhysical = FileSystem.Instance.HasDriveLetter(rootPath);
+      bool locationIsPhysical = FileSystem.Local.HasDriveLetter(rootPath);
       Assert.IsTrue(locationIsPhysical, "The location folder path must be physical i.e. contain a drive letter. Please choose another location folder");
 
       string webRootPath = Path.Combine(rootPath, "Website");
@@ -91,7 +91,7 @@ namespace SIM.Tool.UserControls.Install
       bool hostExists = WebServerManager.HostBindingExists(host);
       Assert.IsTrue(!hostExists, "Website with the same host name already exists");
 
-      bool rootFolderExists = FileSystem.Instance.DirectoryExists(rootPath);
+      bool rootFolderExists = FileSystem.Local.DirectoryExists(rootPath);
       if (rootFolderExists && InstanceManager.Instances != null)
       {
         if (InstanceManager.Instances.Any(i => i.WebRootPath.EqualsIgnoreCase(webRootPath)))
@@ -105,7 +105,7 @@ namespace SIM.Tool.UserControls.Install
           return false;
         }
 
-        FileSystem.Instance.DeleteIfExists(rootPath);
+        FileSystem.Local.DeleteIfExists(rootPath);
       }
 
       var connectionString = ProfileManager.GetConnectionString();
@@ -113,7 +113,7 @@ namespace SIM.Tool.UserControls.Install
 
       string licensePath = ProfileManager.Profile.License;
       Assert.IsNotNull(licensePath, "The license file isn't set in the Settings window");
-      FileSystem.Instance.AssertFileExists(licensePath, "The {0} file is missing".FormatWith(licensePath));
+      FileSystem.Local.AssertFileExists(licensePath, "The {0} file is missing".FormatWith(licensePath));
 
       string framework = (string)((ListBoxItem)this.netFramework.SelectedValue).Content;
       string[] frameworkArr = framework.Split(' ');
