@@ -34,42 +34,36 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="SIM.Base">
-      <HintPath>D:\SIM.LATER\SIM.Base.dll</HintPath>
+      <HintPath>D:\SIM.FORBUILD\SIM.Base.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SIM.Kernel.Adapters">
-      <HintPath>D:\SIM.LATER\SIM.Kernel.Adapters.dll</HintPath>
+      <HintPath>D:\SIM.FORBUILD\SIM.Kernel.Adapters.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SIM.Kernel.Instances">
-      <HintPath>D:\SIM.LATER\SIM.Kernel.Instances.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SIM.Kernel.Pipelines">
-      <HintPath>D:\SIM.LATER\SIM.Kernel.Pipelines.dll</HintPath>
+      <HintPath>D:\SIM.FORBUILD\SIM.Kernel.Instances.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SIM.Kernel.Products">
-      <HintPath>D:\SIM.LATER\SIM.Kernel.Products.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SIM.Pipelines">
-      <HintPath>D:\SIM.LATER\SIM.Pipelines.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SIM.Tool">
-      <HintPath>D:\SIM.LATER\SIM.Tool.exe</HintPath>
+      <HintPath>D:\SIM.FORBUILD\SIM.Kernel.Products.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SIM.Tool.Base">
-      <HintPath>D:\SIM.LATER\SIM.Tool.Base.dll</HintPath>
+      <HintPath>D:\SIM.FORBUILD\SIM.Tool.Base.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SIM.Tool.Windows">
+      <HintPath>D:\SIM.FORBUILD\SIM.Tool.Windows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SIM.Tool.Wizards">
+      <HintPath>D:\SIM.FORBUILD\SIM.Tool.Wizards.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />

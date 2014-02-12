@@ -7,11 +7,11 @@ using SIM.Tool.Base.Plugins;
 
 namespace PrettyInstallationWindow
 {
-    class EntryPoint : IInitProcessor
+  class EntryPoint : IInitProcessor
+  {
+    void IInitProcessor.Process()
     {
-        void IInitProcessor.Process()
-        {
-            InstanceDetailsInjector.Inject();
-        }
+      InstanceDetailsInjector.Inject();
     }
+  }
 }

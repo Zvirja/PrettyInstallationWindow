@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using SIM.Tool;
 using SIM.Tool.UserControls.Install;
+using SIM.Tool.Wizards;
 
 namespace APODirtyPlugin
 {

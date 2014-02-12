@@ -16,7 +16,6 @@ using SIM.Tool.Base;
 using SIM.Tool.Base.Pipelines;
 using SIM.Tool.Base.Profiles;
 using SIM.Tool.Base.Wizards;
-using SIM.Tool.Properties;
 
 #endregion
 
