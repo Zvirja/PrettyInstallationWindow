@@ -16,6 +16,7 @@ using SIM.Tool.Base;
 using SIM.Tool.Base.Pipelines;
 using SIM.Tool.Base.Profiles;
 using SIM.Tool.Base.Wizards;
+using SIM.Tool.Windows;
 
 #endregion
 
@@ -50,7 +51,7 @@ namespace SIM.Tool.UserControls.Install
 
     public static bool InstallEverywhere
     {
-      get { return AdvancedSettings.CoreInstallEverywhere.Value; }
+      get { return MainWindowHelper.Settings.AppInstallEverywhere.Value; }
     }
 
     #endregion
@@ -466,11 +467,11 @@ namespace SIM.Tool.UserControls.Install
     {
       //init
 
-      this.SelectProductByValue(ProductName, AdvancedSettings.AppInstallationDefaultProduct.Value);
-      this.SelectProductByValue(ProductVersion, AdvancedSettings.AppInstallationDefaultProductVersion.Value);
-      this.SelectByValue(ProductRevision, AdvancedSettings.AppInstallationDefaultProductRevision.Value);
-      this.SelectByValue(netFramework, AdvancedSettings.AppInstallationDefaultFramework.Value);
-      this.SelectByValue(mode, AdvancedSettings.AppInstallationDefaultPoolMode.Value);
+      this.SelectProductByValue(ProductName, MainWindowHelper.Settings.AppInstallationDefaultProduct.Value);
+      this.SelectProductByValue(ProductVersion, MainWindowHelper.Settings.AppInstallationDefaultProductVersion.Value);
+      this.SelectByValue(ProductRevision, MainWindowHelper.Settings.AppInstallationDefaultProductRevision.Value);
+      this.SelectByValue(netFramework, MainWindowHelper.Settings.AppInstallationDefaultFramework.Value);
+      this.SelectByValue(mode, MainWindowHelper.Settings.AppInstallationDefaultPoolMode.Value); 
 
       /*FocusManager.SetFocusedElement(ProductRevision.Parent, ProductRevision);
       Keyboard.Focus(ProductRevision);  
