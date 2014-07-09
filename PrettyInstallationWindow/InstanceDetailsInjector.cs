@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using SIM.Tool;
-using SIM.Tool.UserControls.Install;
+using SIM.Tool.Windows.UserControls.Install;
 using SIM.Tool.Wizards;
 
 namespace APODirtyPlugin

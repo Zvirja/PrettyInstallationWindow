@@ -6,7 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using SIM.Adapters.SqlServer;
 using SIM.Adapters.WebServer;
 using SIM.Base;
@@ -16,18 +17,23 @@ using SIM.Tool.Base;
 using SIM.Tool.Base.Pipelines;
 using SIM.Tool.Base.Profiles;
 using SIM.Tool.Base.Wizards;
-using SIM.Tool.Windows;
+using System.Collections.ObjectModel;
+using System.Xml;
 
 #endregion
 
-namespace SIM.Tool.UserControls.Install
+namespace SIM.Tool.Windows.UserControls.Install
 {
-  using System.Windows.Controls.Primitives;
-  using System.Windows.Media;
+  #region
+
+
+
+  #endregion
 
   /// <summary>
-  /// Interaction logic for InstanceDetailsExtended.xaml
+  ///   Interaction logic for CollectData.xaml
   /// </summary>
+  [UsedImplicitly]
   public partial class InstanceDetailsExtended : IWizardStep, IFlowControl
   {
     #region Fields
@@ -36,6 +42,10 @@ namespace SIM.Tool.UserControls.Install
     ///   The standalone products.
     /// </summary>
     private IEnumerable<Product> standaloneProducts;
+
+    private readonly ICollection<string> allFrameworkVersions = Environment.Is64BitOperatingSystem ? new[] { "v2.0", "v2.0 32bit", "v4.0", "v4.0 32bit" } : new[] { "v2.0", "v4.0" };
+
+    private InstallWizardArgs installParameters = null;
 
     #endregion
 
@@ -47,6 +57,8 @@ namespace SIM.Tool.UserControls.Install
     public InstanceDetailsExtended()
     {
       this.InitializeComponent();
+
+      this.netFramework.ItemsSource = allFrameworkVersions;
     }
 
     public static bool InstallEverywhere
@@ -68,7 +80,7 @@ namespace SIM.Tool.UserControls.Install
       Assert.IsNotNull(product, "product");
 
       string name = this.InstanceName.Text.EmptyToNull();
-      Assert.IsNotNull(name, "Instance name isn't set");
+      Assert.IsNotNull(name, @"Instance name isn't set");
 
       string host = this.hostName.Text.EmptyToNull();
       Assert.IsNotNull(host, "Hostname must not be emoty");
@@ -77,21 +89,45 @@ namespace SIM.Tool.UserControls.Install
       Assert.IsNotNull(rootName, "Root folder name must not be emoty");
 
       string location = this.locationFolder.Text.EmptyToNull();
-      Assert.IsNotNull(location, "The location folder isn't set");
+      Assert.IsNotNull(location, @"The location folder isn't set");
 
       string rootPath = Path.Combine(location, rootName);
-      bool locationIsPhysical = FileSystem.Local.HasDriveLetter(rootPath);
+      bool locationIsPhysical = FileSystem.Local.Directory.HasDriveLetter(rootPath);
       Assert.IsTrue(locationIsPhysical, "The location folder path must be physical i.e. contain a drive letter. Please choose another location folder");
 
       string webRootPath = Path.Combine(rootPath, "Website");
 
       bool websiteExists = WebServerManager.WebsiteExists(name);
+      if (websiteExists)
+      {
+        using (var context = WebServerManager.CreateContext("InstanceDetails.OnMovingNext('{0}')".FormatWith(name)))
+        {
+          var site = context.Sites.Single(s => s.Name.EqualsIgnoreCase(name));
+          var path = WebServerManager.GetWebRootPath(site);
+          if (FileSystem.Local.Directory.Exists(path))
+          {
+            this.Alert("The website with the same name already exists, please choose another instance name.");
+            return false;
+          }
+
+          if (
+            WindowHelper.ShowMessage("There website with the same name already exists, but points to non-existing location. Would you like to delete it?",
+              MessageBoxButton.OKCancel, MessageBoxImage.Asterisk) != MessageBoxResult.OK)
+          {
+            return false;
+          }
+
+          site.Delete();
+          context.CommitChanges();
+        }
+      }
+      websiteExists = WebServerManager.WebsiteExists(name);
       Assert.IsTrue(!websiteExists, "The website with the same name already exists, please choose another instance name.");
 
       bool hostExists = WebServerManager.HostBindingExists(host);
       Assert.IsTrue(!hostExists, "Website with the same host name already exists");
 
-      bool rootFolderExists = FileSystem.Local.DirectoryExists(rootPath);
+      bool rootFolderExists = FileSystem.Local.Directory.Exists(rootPath);
       if (rootFolderExists && InstanceManager.Instances != null)
       {
         if (InstanceManager.Instances.Any(i => i.WebRootPath.EqualsIgnoreCase(webRootPath)))
@@ -100,22 +136,22 @@ namespace SIM.Tool.UserControls.Install
           return false;
         }
 
-        if (MessageBox.Show("The folder with the same name already exists. Would you like to delete it?", "SIM", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) != MessageBoxResult.OK)
+        if (WindowHelper.ShowMessage("The folder with the same name already exists. Would you like to delete it?", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) != MessageBoxResult.OK)
         {
           return false;
         }
 
-        FileSystem.Local.DeleteIfExists(rootPath);
+        FileSystem.Local.Directory.DeleteIfExists(rootPath);
       }
 
       var connectionString = ProfileManager.GetConnectionString();
       SqlServerManager.Instance.ValidateConnectionString(connectionString);
 
       string licensePath = ProfileManager.Profile.License;
-      Assert.IsNotNull(licensePath, "The license file isn't set in the Settings window");
-      FileSystem.Local.AssertFileExists(licensePath, "The {0} file is missing".FormatWith(licensePath));
+      Assert.IsNotNull(licensePath, @"The license file isn't set in the Settings window");
+      FileSystem.Local.File.AssertExists(licensePath, "The {0} file is missing".FormatWith(licensePath));
 
-      string framework = (string)((ListBoxItem)this.netFramework.SelectedValue).Content;
+      string framework = this.netFramework.SelectedValue.ToString();
       string[] frameworkArr = framework.Split(' ');
       Assert.IsTrue(frameworkArr.Length > 0, "impossible");
       bool force32Bit = frameworkArr.Length == 2;
@@ -159,7 +195,7 @@ namespace SIM.Tool.UserControls.Install
       Assert.ArgumentNotNull(message, "message");
       Assert.ArgumentNotNull(args, "args");
 
-      MessageBox.Show(message.FormatWith(args), "Conflict is found", MessageBoxButton.OK, MessageBoxImage.Stop);
+      WindowHelper.ShowMessage(message.FormatWith(args), "Conflict is found", MessageBoxButton.OK, MessageBoxImage.Stop);
     }
 
 
@@ -170,13 +206,6 @@ namespace SIM.Tool.UserControls.Install
     {
       this.DataContext = new Model();
       this.standaloneProducts = ProductManager.StandaloneProducts;
-      if (!Environment.Is64BitOperatingSystem)
-      {
-        foreach (var comboBoxItem in this.netFramework.Items.OfType<ComboBoxItem>().Where(cb => ((string)cb.Content).Contains("32bit")).ToArray())
-        {
-          this.netFramework.Items.Remove(comboBoxItem);
-        }
-      }
 
       this.ModifyParentSize();
     }
@@ -250,36 +279,45 @@ namespace SIM.Tool.UserControls.Install
         this.InstanceName.Text = name;
         this.hostName.Text = name;
         this.RootName.Text = product.DefaultFolderName;
-        this.sqlPrefix.Text = name; 
+        this.sqlPrefix.Text = name;
 
-        /*var m = product.Manifest;
-        if(m != null)
+        var frameworkVersions = new ObservableCollection<string>(this.allFrameworkVersions);
+
+        var m = product.Manifest;
+        if (m != null)
         {
-          var node = (XmlElement) m.SelectSingleNode(ManifestPrefix + "standalone/install/limitations");
-          if(node != null)
+          var node = (XmlElement)m.SelectSingleNode("/manifest/*/limitations");
+          if (node != null)
           {
-            foreach (var limitation in node.ChildElements())
+            foreach (XmlElement limitation in node.ChildNodes)
             {
               var lname = limitation.Name;
               switch (lname.ToLower())
               {
-                case "apppoolinfo":
-                {
-                  foreach (var nestedlimitation in limitation.ChildElements())
+                case "framework":
                   {
-                    v
+                    var supportedVersions = limitation.SelectElements("supportedVersion");
+                    if (supportedVersions != null)
+                    {
+                      ICollection<string> supportedVersionNames = supportedVersions.Select(supportedVersion => supportedVersion.InnerText).ToArray();
+                      for (int i = frameworkVersions.Count - 1; i >= 0; i--)
+                      {
+                        if (!supportedVersionNames.Contains(frameworkVersions[i]))
+                        {
+                          frameworkVersions.RemoveAt(i);
+                        }
+                      }
+                    }
+                    break;
                   }
-                  
-                  break;
-                }
               }
             }
           }
-        }*/
+        }
+
+        this.netFramework.ItemsSource = frameworkVersions;
+        this.netFramework.SelectedIndex = frameworkVersions.IndexOf(frameworkVersions.Last(framName => !framName.Contains("32")));
       }
-/*      FocusManager.SetFocusedElement(this, InstanceName);
-      Keyboard.Focus(InstanceName);
-      InstanceName.SelectionStart = InstanceName.Text.Length;*/
     }
 
     /// <summary>
@@ -297,7 +335,7 @@ namespace SIM.Tool.UserControls.Install
       if (grouping != null)
       {
         this.ProductRevision.DataContext = grouping.OrderBy(p => p.Revision);
-        this.SelectFirst(this.ProductRevision);
+        this.SelectLast(this.ProductRevision);
       }
     }
 
@@ -392,9 +430,15 @@ namespace SIM.Tool.UserControls.Install
     {
       Assert.ArgumentNotNull(element, "element");
 
+      if (string.IsNullOrEmpty(value))
+      {
+        SelectLast(element);
+        return;
+      }
+
       if (element.Items.Count > 0)
       {
-        foreach (IGrouping<string,Product> item in element.Items)
+        foreach (System.Linq.IGrouping<string, Product> item in element.Items)
         {
           if (item.First().Name.EqualsIgnoreCase(value, true))
           {
@@ -409,18 +453,17 @@ namespace SIM.Tool.UserControls.Install
           }
         }
       }
-      var listBox = element as ListBox;
-      if (listBox != null)
-      {
-        if(element.Items.Count > 0)
-          listBox.ScrollIntoView(element.Items[element.Items.Count - 1]);
-        listBox.ScrollIntoView(element.SelectedItem);
-      }
     }
 
     private void SelectByValue([NotNull] Selector element, string value)
     {
       Assert.ArgumentNotNull(element, "element");
+
+      if (string.IsNullOrEmpty(value))
+      {
+        SelectLast(element);
+        return;
+      }
 
       if (element.Items.Count > 0)
       {
@@ -442,12 +485,24 @@ namespace SIM.Tool.UserControls.Install
         }
         else
         {
-          foreach (ContentControl item in element.Items)
+          foreach (var item in element.Items)
           {
-            if (item.Content.ToString().EqualsIgnoreCase(value, true))
+            if (item is ComboBoxItem)
             {
-              element.SelectedItem = item;
-              break;
+              if ((item as ComboBoxItem).Content.ToString().EqualsIgnoreCase(value, true))
+              {
+                element.SelectedItem = item;
+                break;
+              }
+            }
+
+            if (item is string)
+            {
+              if ((item as string).EqualsIgnoreCase(value, true))
+              {
+                element.SelectedItem = item;
+                break;
+              }
             }
           }
         }
@@ -465,18 +520,30 @@ namespace SIM.Tool.UserControls.Install
     /// </param>
     private void WindowLoaded(object sender, RoutedEventArgs e)
     {
-      //init
+      if (this.installParameters.Product == null)
+      {
+        this.SelectProductByValue(ProductName, MainWindowHelper.Settings.AppInstallationDefaultProduct.Value);
+        this.SelectProductByValue(ProductVersion, MainWindowHelper.Settings.AppInstallationDefaultProductVersion.Value);
+        this.SelectByValue(ProductRevision, MainWindowHelper.Settings.AppInstallationDefaultProductRevision.Value);
 
-      this.SelectProductByValue(ProductName, MainWindowHelper.Settings.AppInstallationDefaultProduct.Value);
-      this.SelectProductByValue(ProductVersion, MainWindowHelper.Settings.AppInstallationDefaultProductVersion.Value);
-      this.SelectByValue(ProductRevision, MainWindowHelper.Settings.AppInstallationDefaultProductRevision.Value);
-      this.SelectByValue(netFramework, MainWindowHelper.Settings.AppInstallationDefaultFramework.Value);
-      this.SelectByValue(mode, MainWindowHelper.Settings.AppInstallationDefaultPoolMode.Value); 
+        if (string.IsNullOrEmpty(MainWindowHelper.Settings.AppInstallationDefaultFramework.Value))
+        {
+          this.netFramework.SelectedIndex = 0;
+        }
+        else
+        {
+          this.SelectByValue(netFramework, MainWindowHelper.Settings.AppInstallationDefaultFramework.Value);
+        }
 
-      /*FocusManager.SetFocusedElement(ProductRevision.Parent, ProductRevision);
-      Keyboard.Focus(ProductRevision);  
-*/
-      //netFramework
+        if (string.IsNullOrEmpty(MainWindowHelper.Settings.AppInstallationDefaultPoolMode.Value))
+        {
+          this.mode.SelectedIndex = 0;
+        }
+        else
+        {
+          this.SelectByValue(mode, MainWindowHelper.Settings.AppInstallationDefaultPoolMode.Value);
+        }
+      }
     }
 
     #endregion
@@ -546,9 +613,9 @@ namespace SIM.Tool.UserControls.Install
 
       this.locationFolder.Text = ProfileManager.Profile.InstancesFolder;
       this.ProductName.DataContext = this.standaloneProducts.GroupBy(p => p.Name);
-      this.netFramework.SelectedIndex = 0;
 
       var args = (InstallWizardArgs)wizardArgs;
+      this.installParameters = args;
 
       Product product = args.Product;
       if (product != null)
@@ -565,20 +632,9 @@ namespace SIM.Tool.UserControls.Install
       AppPoolInfo info = args.InstanceAppPoolInfo;
       if (info != null)
       {
-        if (info.FrameworkVersion == "v4.0")
-        {
-          this.netFramework.SelectedIndex = 2;
-        }
-
-        if (info.Enable32BitAppOnWin64)
-        {
-          this.netFramework.SelectedIndex++;
-        }
-
-        if (!info.ManagedPipelineMode)
-        {
-          this.mode.SelectedIndex = 1;
-        }
+        var frameworkValue = info.FrameworkVersion + " " + (info.Enable32BitAppOnWin64 ? "32bit" : string.Empty);
+        this.SelectByValue(this.netFramework, frameworkValue);
+        this.SelectByValue(this.mode, info.ManagedPipelineMode ? "Integrated" : "Classic");
       }
 
       string name = args.InstanceName;
@@ -608,8 +664,6 @@ namespace SIM.Tool.UserControls.Install
           this.locationFolder.Text = location;
         }
       }
-      //
-      this.WindowLoaded(null, null);
     }
 
     bool IWizardStep.SaveChanges(WizardArgs wizardArgs)
@@ -617,7 +671,6 @@ namespace SIM.Tool.UserControls.Install
       return true;
     }
 
-    #endregion
 
     private double originalHeight;
     private double originalWidth;
@@ -633,6 +686,9 @@ namespace SIM.Tool.UserControls.Install
         textBox.Text = newTextValue;
     }
 
+    /*
+     *This method should be put at the end of Init() method. 
+     */
     private void ModifyParentSize()
     {
       var parent = this.Parent;
@@ -645,7 +701,10 @@ namespace SIM.Tool.UserControls.Install
         originalHeight = pWindow.Height;
       /*originalWidth = pWindow.Width;//*/
       if (pWindow.Height == originalHeight)
-        pWindow.Height += 110;
+        pWindow.Height += 150;
+
+
+
     }
 
     private void Expander_Expanded(object sender, RoutedEventArgs e)
@@ -673,5 +732,6 @@ namespace SIM.Tool.UserControls.Install
     }
 
 
+    #endregion
   }
 }

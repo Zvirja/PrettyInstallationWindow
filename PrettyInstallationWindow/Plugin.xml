@@ -2,4 +2,9 @@
   <init>
     <processor type="PrettyInstallationWindow.EntryPoint, PrettyInstallationWindow" />
   </init>
+  <mainWindow>
+    <loaded>
+      <processor type="PrettyInstallationWindow.EntryPoint, PrettyInstallationWindow" />
+    </loaded>
+  </mainWindow>
 </plugin>

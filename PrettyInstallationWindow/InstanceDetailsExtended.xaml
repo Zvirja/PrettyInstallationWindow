@@ -1,5 +1,4 @@
-﻿<UserControl x:Class="SIM.Tool.UserControls.Install.InstanceDetailsExtended" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:Converters="clr-namespace:SIM.Tool.Base.Converters;assembly=SIM.Tool.Base" xmlns:Base="clr-namespace:SIM.Base;assembly=SIM.Base"
-             xmlns:UserControls="clr-namespace:SIM.Tool.UserControls" xmlns:Install="clr-namespace:SIM.Tool.UserControls.Install"
+﻿<UserControl x:Class="SIM.Tool.Windows.UserControls.Install.InstanceDetailsExtended" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:Converters="clr-namespace:SIM.Tool.Base.Converters;assembly=SIM.Tool.Base" xmlns:Base="clr-namespace:SIM.Base;assembly=SIM.Base"
              xmlns:install="clr-namespace:SIM.Tool.Windows.UserControls.Install;assembly=SIM.Tool.Windows"
              mc:Ignorable="d" d:DesignHeight="317" d:DesignWidth="446">
   <Grid>
@@ -19,11 +18,11 @@
     </Grid.RowDefinitions>
 
     <TextBlock Grid.Row="4" Grid.Column="0" Text="Framework: " />
-    <ComboBox Grid.Row="4" Grid.Column="1" Name="netFramework" SelectedIndex="0" TabIndex="4">
-      <ComboBoxItem>v2.0</ComboBoxItem>
+    <ComboBox Grid.Row="4" Grid.Column="1" Name="netFramework" SelectedIndex="0" TabIndex="4" ItemsSource="{Binding}">
+<!--      <ComboBoxItem>v2.0</ComboBoxItem>
       <ComboBoxItem>v2.0 32bit</ComboBoxItem>
       <ComboBoxItem>v4.0</ComboBoxItem>
-      <ComboBoxItem>v4.0 32bit</ComboBoxItem>
+      <ComboBoxItem>v4.0 32bit</ComboBoxItem>-->
     </ComboBox>
 
     <TextBlock Grid.Row="4" Grid.Column="2" Text="Pool Mode: " />
