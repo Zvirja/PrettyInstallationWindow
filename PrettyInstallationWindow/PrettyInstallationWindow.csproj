@@ -33,24 +33,25 @@
   <ItemGroup>
     <Reference Include="Fluent">
       <HintPath>D:\SIM.FORBUILD\Fluent.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Administration, Version=7.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="SIM.Adapters">
+      <HintPath>D:\SIM.FORBUILD\SIM.Adapters.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="SIM.Base">
       <HintPath>D:\SIM.FORBUILD\SIM.Base.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SIM.Kernel.Adapters">
-      <HintPath>D:\SIM.FORBUILD\SIM.Kernel.Adapters.dll</HintPath>
+    <Reference Include="SIM.Instances">
+      <HintPath>D:\SIM.FORBUILD\SIM.Instances.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SIM.Kernel.Instances">
-      <HintPath>D:\SIM.FORBUILD\SIM.Kernel.Instances.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SIM.Kernel.Products">
-      <HintPath>D:\SIM.FORBUILD\SIM.Kernel.Products.dll</HintPath>
+    <Reference Include="SIM.Products">
+      <HintPath>D:\SIM.FORBUILD\SIM.Products.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SIM.Tool.Base">
@@ -65,6 +66,9 @@
       <HintPath>D:\SIM.FORBUILD\SIM.Tool.Wizards.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Sitecore.Diagnostics.Base">
+      <HintPath>D:\SIM.FORBUILD\Sitecore.Diagnostics.Base.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
@@ -74,10 +78,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EntryPoint.cs" />
+    <Compile Include="InstanceDetailsDialogExtensions.cs" />
     <Compile Include="InstanceDetailsExtended.xaml.cs">
       <DependentUpon>InstanceDetailsExtended.xaml</DependentUpon>
     </Compile>
     <Compile Include="InstanceDetailsInjector.cs" />
+    <Compile Include="PluginProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -87,7 +93,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Plugin.xml" />
+    <Content Include="Plugin.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
