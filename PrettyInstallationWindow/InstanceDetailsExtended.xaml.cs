@@ -550,6 +550,8 @@ namespace SIM.Tool.Windows.UserControls.Install
           this.SelectByValue(mode, WindowsSettings.AppInstallationDefaultPoolMode.Value);
         }
       }
+
+      new InstanceDetailsDialogExtensions(this, this.ProductVersion, this.ProductRevision, this.MoreSettings, this.InstanceName).InitializeCustomExtensions();
     }
 
     #endregion
@@ -659,8 +661,6 @@ namespace SIM.Tool.Windows.UserControls.Install
           this.locationFolder.Text = location;
         }
       }
-
-      new InstanceDetailsDialogExtensions(this, this.ProductVersion, this.ProductRevision, this.MoreSettings, this.InstanceName).InitializeCustomExtensions();
     }
 
     bool IWizardStep.SaveChanges(WizardArgs wizardArgs)
